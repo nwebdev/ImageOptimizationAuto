@@ -1,0 +1,70 @@
+<?php
+
+if(!empty($argv[1])){
+    $path = $d = $argv[1];
+    error_log($path);
+    // exit;
+} else {
+    $path = $d = '/var/www/admin/public/product/';
+}
+
+
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+if (extension_loaded('imagick')) {
+    // echo 'Supported';
+} else {
+    echo 'Not supported';
+    exit;
+}
+
+function imagicFx($path, $first= false){
+
+    $handle = fopen($path, 'rb');
+    error_log($path);
+    if($first){
+        $img = new Imagick();
+        $img->readImageFile($handle);
+        $img->setImageFormat( "webp" );
+        $img->writeImage($path.'.webp');
+    } else {
+        $img = new Imagick();
+        $img->readImageFile($handle);
+        $img->setImageFormat( "webp" );
+        $thumbnail = $img->getImageBlob();
+
+        file_put_contents($path, $thumbnail);
+    }
+}
+
+$command = "find ".$path." -name '*.jpg' -or -name '*.png' -or -name '*.JPG' -or -name '*.jpeg' -or -name '*.JPEG' -or -name '*.PNG'";
+
+$ubuntu = shell_exec($command);
+$imag = explode("\n", $ubuntu);
+array_pop($imag);
+$i=0;
+foreach($imag as $path){
+
+    try{
+        imagicFx($path, true);
+        imagicFx($path.'.webp', false);
+        // imagicFx($path.'.webp', false);
+        // imagicFx($path.'.webp', false);
+        // imagicFx($path.'.webp', false);
+        // imagicFx($path, false);
+        // imagicFx($path, false);
+
+    } catch(Exception $e){
+        error_log($e->getMessage());
+        // exit;
+    }
+    error_log(++$i);
+}
+echo "<pre>";
+print_r($imag);
+exit;
+
+
+
